@@ -1,24 +1,33 @@
 import os
+
 from dataclasses import dataclass, field
 from typing import List, Dict
 
+from ..config import SplitConfig
+
 @dataclass
 class DatasetStructure:
-    root_dir     : str
-    original_data: str = field(init=False)
-    dev_split    : str = field(init=False)
-    val_split    : str = field(init=False)
-    dev_subsplit : str = field(init=False)
-    val_subsplit : str = field(init=False)
-    metadata     : str = field(init=False)
+    root_dir         : str
+    original_data    : str = field(init=False)
+    dev_split        : str = field(init=False)
+    tst_split        : str = field(init=False)
+    dev_subsplit     : str = field(init=False)
+    tst_subsplit     : str = field(init=False)
+    metadata         : str = field(init=False)
+    dev_subsplit_list: List[str] = field(default_factory=list)
+    tst_subsplit_list: List[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         self.original_data = os.path.join(self.root_dir, "original")
         self.dev_split     = os.path.join(self.root_dir, "dev_split")
-        self.val_split     = os.path.join(self.root_dir, "val_split")
-        self.dev_subsplit  = os.path.join(self.dev_split, "subsplit")
-        self.val_subsplit  = os.path.join(self.val_split, "subsplit")
+        self.tst_split     = os.path.join(self.root_dir, "tst_split")
+        self.dev_subsplit  = os.path.join(self.dev_split, "subsplits")
+        self.tst_subsplit  = os.path.join(self.tst_split, "subsplits")
         self.metadata      = os.path.join(self.root_dir, "metadata")
+
+    def add_subsplits(self, split_config: SplitConfig):
+        self.dev_subsplit_list = [os.path.join(self.dev_subsplit, name) for name in split_config.dev_subsplits.keys()]
+        self.tst_subsplit_list = [os.path.join(self.tst_subsplit, name) for name in split_config.tst_subsplits.keys()]
 
 @dataclass
 class MetadataStructure:
@@ -32,4 +41,3 @@ class MetadataStructure:
 
     def __post_init__(self) -> None:
         self.features = [var for var in self.variables if var not in self.labels]
-
