@@ -1,16 +1,24 @@
-from abc import ABC, abstractmethod
-from typing import Tuple, List
+from abc import abstractmethod
+from dataclasses import dataclass
+from typing import Tuple, List, Dict, ClassVar
 
 from pandas import DataFrame
 
-from ..config import SplitConfig
+from ..config import BaseConfig
 from ..registry import Registry
+from ..data import DatasetStructure
+from ..processor import ElementalProcessor
 
-splitters: Registry[BaseSplitter] = Registry("splitters")
+@dataclass
+class SplitConfig(BaseConfig):
+    dev_split_fraction: float
+    dev_subsplits: Dict[str, float]
+    tst_subsplits: Dict[str, float]
+    types: ClassVar[Registry[BaseSplitter]] = Registry("splitters")
 
-class BaseSplitter(ABC):
-    def __init__(self, split_config: SplitConfig) -> None:
-        self.split_config = split_config
+class BaseSplitter(ElementalProcessor):
+    def __init__(self, config: SplitConfig, dataset_structure: DatasetStructure) -> None:
+        super().__init__(config, dataset_structure)
 
     @abstractmethod
     def split(self, data: DataFrame) -> Tuple[Tuple[DataFrame, List[DataFrame]], Tuple[DataFrame, List[DataFrame]]]:
@@ -20,7 +28,10 @@ class BaseSplitter(ABC):
     def _generate_subsplits(self, data: DataFrame, subsplits: List[float]) -> List[DataFrame]:
         pass
 
-@splitters.register()    
+    def step(self, data: DataFrame) -> Tuple[Tuple[DataFrame, List[DataFrame]], Tuple[DataFrame, List[DataFrame]]]:
+        return self.split(data)
+
+@SplitConfig.splitters.register()    
 class RandomSplitter(BaseSplitter):
     name = "random"
     def __init__(self, split_config: SplitConfig) -> None:

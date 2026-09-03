@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from types import Tuple, List, Dict
+from types import Tuple, List, Dict, Optional
+from ..registry import Registry
 
 @dataclass
 class SourceData:
@@ -9,15 +10,13 @@ class SourceData:
     data_types: Dict[str, str]
 
 @dataclass
-class SplitConfig:
-    source_data: SourceData
-    dev_split_fraction: float
-    dev_subsplits: Dict[str, float]
-    tst_subsplits: Dict[str, float]
+class BaseConfig:
+    name: str
+    types: Optional[Registry[BaseConfig]]
 
 @dataclass
-class BaseConfig:
-    process_id: str
+class InputConfig(BaseConfig):
+    source_data: SourceData
     labels: List[str]
     features: List[str]
 
@@ -25,7 +24,7 @@ class BaseConfig:
 class StepConfig:
     name: str
     process_config: BaseConfig
-    discard_after: bool = False
+    discard_after: bool = True
 
 @dataclass
 class ProcessConfig:

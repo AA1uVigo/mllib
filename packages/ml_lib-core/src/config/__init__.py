@@ -1,6 +1,6 @@
 from .config_schema import (
     SourceData,
-    SplitConfig,
+    InputConfig,
     BaseConfig,
     StepConfig,
     ProcessConfig
@@ -10,8 +10,9 @@ from .config_loader import ConfigLoader
 
 __all__=[
     "SourceData",
-    "SplitConfig",
+    "InputConfig",
     "BaseConfig",
     "StepConfig",
-    "ProcessConfig"
+    "ProcessConfig",
+    "ConfigLoader"
 ]
