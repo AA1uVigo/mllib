@@ -25,7 +25,7 @@ class DatasetStructure:
         self.tst_subsplit  = os.path.join(self.tst_split, "subsplits")
         self.metadata      = os.path.join(self.root_dir, "metadata")
 
-    def add_subsplits(self, split_config: SplitConfig):
+    def add_subsplits(self, split_config: SplitConfig) -> None:
         self.dev_subsplit_list = [os.path.join(self.dev_subsplit, name) for name in split_config.dev_subsplits.keys()]
         self.tst_subsplit_list = [os.path.join(self.tst_subsplit, name) for name in split_config.tst_subsplits.keys()]
 

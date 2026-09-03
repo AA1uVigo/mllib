@@ -1,4 +1,4 @@
-from typing import List, Dict, Iterator, TypeVar, Generic
+from typing import List, Dict, Iterator, TypeVar, Generic, Callable
 
 from ..config import BaseConfig
 
@@ -9,7 +9,7 @@ class Registry(Generic[ElementType]):
         self.family_name = family_name
         self._items: Dict[str, type[ElementType]] = {}
 
-    def register(self, override: bool = False):
+    def register(self, override: bool = False) -> Callable[[type[ElementType]], type[ElementType]]:
         def deco(cls: type[ElementType]) -> type[ElementType]:
             key = getattr(cls, "name", "")
             if not key:
