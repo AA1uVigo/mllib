@@ -14,8 +14,8 @@ class DatasetStructure:
     dev_subsplit     : str = field(init=False)
     tst_subsplit     : str = field(init=False)
     metadata         : str = field(init=False)
-    dev_subsplit_list: List[str] = field(default_factory=list)
-    tst_subsplit_list: List[str] = field(default_factory=list)
+    dev_subsplit_list: Dict[str, str] = field(default_factory=dict)
+    tst_subsplit_list: Dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         self.original_data = os.path.join(self.root_dir, "original")
@@ -26,8 +26,8 @@ class DatasetStructure:
         self.metadata      = os.path.join(self.root_dir, "metadata")
 
     def add_subsplits(self, split_config: SplitConfig) -> None:
-        self.dev_subsplit_list = [os.path.join(self.dev_subsplit, name) for name in split_config.dev_subsplits.keys()]
-        self.tst_subsplit_list = [os.path.join(self.tst_subsplit, name) for name in split_config.tst_subsplits.keys()]
+        self.dev_subsplit_list = {name: os.path.join(self.dev_subsplit, name) for name in split_config.dev_subsplits.keys()}
+        self.tst_subsplit_list = {name: os.path.join(self.tst_subsplit, name) for name in split_config.tst_subsplits.keys()}
 
 @dataclass
 class MetadataStructure:

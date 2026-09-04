@@ -48,7 +48,7 @@ class ConfigLoader:
         except:
             pass
 
-    def get_process_config(config_path: str) -> ProcessConfig:
+    def get_split_process_config(config_path: str) -> ProcessConfig:
         input_config = ConfigLoader.get_input_config(config_path)
         split_config = ConfigLoader.get_split_config(config_path)
 

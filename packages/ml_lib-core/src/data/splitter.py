@@ -25,11 +25,23 @@ class BaseSplitter(ElementalProcessor):
         pass
 
     @abstractmethod
-    def _generate_subsplits(self, data: DataFrame, subsplits: List[float]) -> List[DataFrame]:
+    def _generate_subsplits(self, data: DataFrame, subsplits: Dict[float]) -> Dict[DataFrame]:
         pass
 
-    def step(self, data: DataFrame) -> Tuple[Tuple[DataFrame, List[DataFrame]], Tuple[DataFrame, List[DataFrame]]]:
-        return self.split(data)
+    def step(self, data: DataFrame) -> Tuple[Tuple[DataFrame, Dict[DataFrame]], Tuple[DataFrame, Dict[DataFrame]]]:
+        splits = self.split(data)
+        with open(self.dataset_structure.dev_split + "/base.csv", "w") as file:
+            splits[0][0].to_csv(file, index=False)
+        with open(self.dataset_structure.tst_split + "/base.csv", "w") as file:
+            splits[1][0].to_csv(file, index=False)
+
+        for name, subsplit_data in splits[0][1].items():
+            with open(self.dataset_structure.dev_subsplit_list[name] + "/base.csv", "w") as file:
+                subsplit_data.to_csv(file)
+        for name, subsplit_data in splits[1][1].items():
+            with open(self.dataset_structure.tst_subsplit_list[name] + "/base.csv", "w") as file:
+                subsplit_data.to_csv(file)
+        return splits
 
 @SplitConfig.splitters.register()    
 class RandomSplitter(BaseSplitter):
@@ -37,22 +49,22 @@ class RandomSplitter(BaseSplitter):
     def __init__(self, split_config: SplitConfig) -> None:
         super().__init__(split_config)
 
-    def split(self, data: DataFrame) -> Tuple[Tuple[DataFrame, List[DataFrame]], Tuple[DataFrame, List[DataFrame]]]:
+    def split(self, data: DataFrame) -> Tuple[Tuple[DataFrame, Dict[DataFrame]], Tuple[DataFrame, Dict[DataFrame]]]:
         dev_fraction = self.split_config.dev_split_fraction
         dev_data = data.sample(frac=dev_fraction, random_state=42)
         tst_data = data.drop(dev_data.index)
 
-        dev_subsplits_data = self._generate_subsplits(dev_data, list(self.split_config.dev_subsplits.values()))
-        tst_subsplits_data = self._generate_subsplits(tst_data, list(self.split_config.tst_subsplits.values()))
+        dev_subsplits_data = self._generate_subsplits(dev_data, self.split_config.dev_subsplits)
+        tst_subsplits_data = self._generate_subsplits(tst_data, self.split_config.tst_subsplits)
 
         return (dev_data, dev_subsplits_data), (tst_data, tst_subsplits_data)
 
-    def _generate_subsplits(self, data: DataFrame, subsplits: List[float]) -> List[DataFrame]:
+    def _generate_subsplits(self, data: DataFrame, subsplits: Dict[float]) -> Dict[DataFrame]:
         aux_data = data.copy()
         acc = 1
-        subsplits_data = []
-        for subsplit_fraction in subsplits:
-            subsplits_data.append(aux_data.sample(frac=subsplit_fraction/acc))
+        subsplits_data = {}
+        for name, subsplit_fraction in subsplits.items():
+            subsplits_data[name] = aux_data.sample(frac=subsplit_fraction/acc)
             acc -= subsplit_fraction
-            aux_data = aux_data.drop(subsplits_data[-1].index)
+            aux_data = aux_data.drop(subsplits_data[subsplit_fraction].index)
         return subsplits_data

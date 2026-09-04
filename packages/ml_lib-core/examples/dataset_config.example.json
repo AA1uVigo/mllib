@@ -1,0 +1,39 @@
+{
+    "data_config": {
+        "name": "hsi_crop_dataset",
+        "source": {
+            "path": "data/raw/hsi_crop_dataset.csv",
+            "name": "HSI Crop Dataset",
+            "description": "Hyperspectral imaging samples of crop leaves used for disease classification.",
+            "data_types": {
+                "band_450nm": "float",
+                "band_550nm": "float",
+                "band_650nm": "float",
+                "band_750nm": "float",
+                "band_850nm": "float",
+                "label": "string"
+            }
+        },
+        "labels": [
+            "label"
+        ],
+        "features": [
+            "band_450nm",
+            "band_550nm",
+            "band_650nm",
+            "band_750nm",
+            "band_850nm"
+        ],
+        "splits": {
+            "name": "random_split",
+            "dev_split_fraction": 0.8,
+            "dev_subsplits": {
+                "train": 0.75,
+                "validation": 0.25
+            },
+            "tst_subsplits": {
+                "test": 1.0
+            }
+        }
+    }
+}
