@@ -25,7 +25,7 @@
             "band_850nm"
         ],
         "splits": {
-            "name": "random_split",
+            "name": "random",
             "dev_split_fraction": 0.8,
             "dev_subsplits": {
                 "train": 0.75,

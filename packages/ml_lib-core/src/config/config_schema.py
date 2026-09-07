@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from types import Tuple, List, Dict, Optional
-from ..registry import Registry
+from typing import Dict
 
 @dataclass
 class SourceData:
@@ -12,23 +11,4 @@ class SourceData:
 @dataclass
 class BaseConfig:
     name: str
-    types: Optional[Registry[BaseConfig]]
-
-@dataclass
-class InputConfig(BaseConfig):
-    source_data: SourceData
-    labels: List[str]
-    features: List[str]
-
-@dataclass
-class StepConfig:
-    name: str
-    process_config: BaseConfig
-    discard_after: bool = True
-
-@dataclass
-class ProcessConfig:
-    name: str
-    description: str
-    source_data: List[SourceData]
-    objectives_config: List[Tuple[StepConfig, StepConfig]]
+    family_name: str

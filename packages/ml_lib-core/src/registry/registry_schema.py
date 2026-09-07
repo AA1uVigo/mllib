@@ -1,7 +1,7 @@
 from typing import List, Dict, Iterator, TypeVar, Generic, Callable
 
 from ..config import BaseConfig
-
+from ..data import DatasetStructure
 ElementType = TypeVar("ElementType")
 
 class Registry(Generic[ElementType]):
@@ -20,10 +20,10 @@ class Registry(Generic[ElementType]):
             return cls
         return deco
 
-    def create(self, name: str, config: BaseConfig) -> ElementType:
-        if name not in self:
+    def create(self, config: BaseConfig, dataset_structure: DatasetStructure) -> ElementType:
+        if config.name not in self:
             pass
-        return self._items[name](config)
+        return self._items[config.name](config, dataset_structure)
 
     def names(self) -> List[str]:
         return sorted(self._items)
@@ -33,3 +33,15 @@ class Registry(Generic[ElementType]):
 
     def __iter__(self) -> Iterator[str]:
         return iter(self._items)
+
+class InstanceGenerator:
+    registries: Dict[str, Registry] = {}
+
+    def add_registry(self, registry: Registry) -> None:
+        self.registries[registry.family_name] = registry
+
+    def create_instance(self, config: BaseConfig, dataset_structure: DatasetStructure) -> ElementType:
+        if config.family_name not in self.registries:
+            pass
+        registry = self.registries[config.family_name]
+        return registry.create(config, dataset_structure)

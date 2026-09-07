@@ -1,5 +1,6 @@
-from .registry_schema import Registry
+from .registry_schema import Registry, InstanceGenerator
 
 __all__ = [
-    "Registry"
+    "Registry",
+    "InstanceGenerator"
 ]

@@ -1,11 +1,10 @@
 from .config_schema import (
     SourceData,
-    InputConfig,
     BaseConfig,
-    StepConfig,
-    ProcessConfig
 )
 from .config_loader import ConfigLoader
+from .config_spliter import SplitConfig, SPLITTER_REGISTRY
+from .config_process import InputConfig, StepConfig, ProcessConfig
 
 
 __all__=[
@@ -14,5 +13,6 @@ __all__=[
     "BaseConfig",
     "StepConfig",
     "ProcessConfig",
+    "SplitConfig",
     "ConfigLoader"
 ]

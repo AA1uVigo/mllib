@@ -3,8 +3,6 @@ import os
 from dataclasses import dataclass, field
 from typing import List, Dict
 
-from ..config import SplitConfig
-
 @dataclass
 class DatasetStructure:
     root_dir         : str
@@ -25,9 +23,9 @@ class DatasetStructure:
         self.tst_subsplit  = os.path.join(self.tst_split, "subsplits")
         self.metadata      = os.path.join(self.root_dir, "metadata")
 
-    def add_subsplits(self, split_config: SplitConfig) -> None:
-        self.dev_subsplit_list = {name: os.path.join(self.dev_subsplit, name) for name in split_config.dev_subsplits.keys()}
-        self.tst_subsplit_list = {name: os.path.join(self.tst_subsplit, name) for name in split_config.tst_subsplits.keys()}
+    def add_subsplits(self, splits_dev: dict, splits_tst: dict) -> None:
+        self.dev_subsplit_list = {name: os.path.join(self.dev_subsplit, name) for name in splits_dev.keys()}
+        self.tst_subsplit_list = {name: os.path.join(self.tst_subsplit, name) for name in splits_tst.keys()}
 
 @dataclass
 class MetadataStructure:

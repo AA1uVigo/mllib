@@ -1,9 +1,7 @@
 from .structure import DatasetStructure
-from .splitter import SplitConfig, BaseSplitter, RandomSplitter
+from .manager import DatasetManager
 
 __all__ = [
     "DatasetStructure",
-    "SplitConfig",
-    "BaseSplitter",
-    "RandomSplitter"
+    "DatasetManager",
 ]

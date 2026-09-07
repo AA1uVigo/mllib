@@ -1,7 +1,8 @@
 import json
 
-from .config_schema import SourceData, InputConfig, ProcessConfig, StepConfig
-from ..data import SplitConfig
+from .config_schema import SourceData
+from .config_process import InputConfig, ProcessConfig, StepConfig
+from .config_spliter import SplitConfig
 
 class ConfigLoader:
     def get_split_config(config_path: str) -> SplitConfig:
@@ -21,7 +22,25 @@ class ConfigLoader:
             return split_data
 
         except:
-            pass
+           print("Error loading split configuration from file:", config_path) 
+
+    def get_source_config(config_path: str) -> SourceData:
+        with open(config_path, 'r') as file:
+            config_dict = json.load(file)["data_config"]
+
+        try:
+            source_dict = config_dict["source"]
+            source_data = SourceData(
+                path = source_dict["path"],
+                name = source_dict["name"],
+                description = source_dict["description"],
+                data_types = source_dict["data_types"]
+            )
+
+            return source_data
+
+        except:
+           print("Error loading source configuration from file:", config_path)
 
     def get_input_config(config_path: str) -> InputConfig:
         with open(config_path, 'r') as file:
@@ -46,7 +65,7 @@ class ConfigLoader:
             return input_config
 
         except:
-            pass
+            print("Error loading input configuration from file:", config_path)
 
     def get_split_process_config(config_path: str) -> ProcessConfig:
         input_config = ConfigLoader.get_input_config(config_path)

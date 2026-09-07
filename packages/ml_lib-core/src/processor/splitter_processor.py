@@ -1,24 +1,17 @@
 from abc import abstractmethod
-from dataclasses import dataclass
-from typing import Tuple, List, Dict, ClassVar
+
+from typing import Tuple, List, Dict
 
 from pandas import DataFrame
 
-from ..config import BaseConfig
-from ..registry import Registry
 from ..data import DatasetStructure
+from ..config import SplitConfig, SPLITTER_REGISTRY
 from ..processor import ElementalProcessor
-
-@dataclass
-class SplitConfig(BaseConfig):
-    dev_split_fraction: float
-    dev_subsplits: Dict[str, float]
-    tst_subsplits: Dict[str, float]
-    types: ClassVar[Registry[BaseSplitter]] = Registry("splitters")
 
 class BaseSplitter(ElementalProcessor):
     def __init__(self, config: SplitConfig, dataset_structure: DatasetStructure) -> None:
         super().__init__(config, dataset_structure)
+        dataset_structure.add_subsplits(config.dev_subsplits, config.tst_subsplits)
 
     @abstractmethod
     def split(self, data: DataFrame) -> Tuple[Tuple[DataFrame, List[DataFrame]], Tuple[DataFrame, List[DataFrame]]]:
@@ -43,19 +36,19 @@ class BaseSplitter(ElementalProcessor):
                 subsplit_data.to_csv(file)
         return splits
 
-@SplitConfig.splitters.register()    
+@SPLITTER_REGISTRY.register()
 class RandomSplitter(BaseSplitter):
     name = "random"
-    def __init__(self, split_config: SplitConfig) -> None:
-        super().__init__(split_config)
+    def __init__(self, split_config: SplitConfig, dataset_structure: DatasetStructure) -> None:
+        super().__init__(split_config, dataset_structure)
 
     def split(self, data: DataFrame) -> Tuple[Tuple[DataFrame, Dict[DataFrame]], Tuple[DataFrame, Dict[DataFrame]]]:
-        dev_fraction = self.split_config.dev_split_fraction
+        dev_fraction = self.config.dev_split_fraction
         dev_data = data.sample(frac=dev_fraction, random_state=42)
         tst_data = data.drop(dev_data.index)
 
-        dev_subsplits_data = self._generate_subsplits(dev_data, self.split_config.dev_subsplits)
-        tst_subsplits_data = self._generate_subsplits(tst_data, self.split_config.tst_subsplits)
+        dev_subsplits_data = self._generate_subsplits(dev_data, self.config.dev_subsplits)
+        tst_subsplits_data = self._generate_subsplits(tst_data, self.config.tst_subsplits)
 
         return (dev_data, dev_subsplits_data), (tst_data, tst_subsplits_data)
 
@@ -66,5 +59,5 @@ class RandomSplitter(BaseSplitter):
         for name, subsplit_fraction in subsplits.items():
             subsplits_data[name] = aux_data.sample(frac=subsplit_fraction/acc)
             acc -= subsplit_fraction
-            aux_data = aux_data.drop(subsplits_data[subsplit_fraction].index)
+            aux_data = aux_data.drop(subsplits_data[name].index)
         return subsplits_data

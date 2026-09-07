@@ -1,0 +1,10 @@
+[project]
+name = "ml_lib-core"
+version = "0.0.1"
+dependencies = [
+  "pandas",
+  "click"
+]
+
+[project.scripts]
+ml-cli = "src.main:main" 

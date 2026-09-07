@@ -4,6 +4,7 @@ import pandas as pd
 
 from ..data import DatasetStructure
 from ..config import BaseConfig, InputConfig, ProcessConfig
+from ..registry import InstanceGenerator
 
 class ElementalProcessor(ABC):
     def __init__(self, config: BaseConfig, dataset_structure: DatasetStructure):
@@ -50,17 +51,20 @@ class LinearProcessor(Processor):
 
         return aux
 
-    def process(self, lazy=True):
+    def _subprocess(self):
+        pass
+
+    def process(self, lazy=False):
         if lazy and not self.started:
             return self._lazy_execute()
 
         process_config = self.process_config.objectives_config
 
         for i, step_config in enumerate(process_config):
-            if step_config[0].process_config.isinstance(InputConfig):
+            if isinstance(step_config[0].process_config, InputConfig):
                 input_file = step_config[0].process_config.source_data.path
                 output_config = step_config[1]
-                self.linear_process = [output_config.process_config.types.create(output_config.process_config.name)]
+                self.linear_process = [InstanceGenerator().create_instance(output_config.process_config, self.dataset_structure)]
 
                 with open(input_file, 'r') as file:
                     self.data = pd.read_csv(file)
@@ -75,7 +79,7 @@ class LinearProcessor(Processor):
                 new_output_config = step_config[1]
 
                 if input_config.name == new_output_config.name:
-                    self.linear_process.append(new_output_config.process_config.types.create(new_output_config.process_config.name))
+                    self.linear_process.append(InstanceGenerator().create_instance(new_output_config.process_config, self.dataset_structure))
                     output = self.linear_process[-1].step(output)
                     process_config.pop(i)
                     break
